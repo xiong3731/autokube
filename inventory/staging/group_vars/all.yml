@@ -1,0 +1,8 @@
+enable_proxy: true
+enable_docker: true
+enable_kubeadm: false
+all_hosts_network_ok: true
+
+k8s_version: "1.28.15"
+ansible_ssh_private_key_file: ~/.ssh/id_rsa
+ansible_python_interpreter: /usr/bin/python3

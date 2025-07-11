@@ -1,0 +1,5 @@
+---
+- name: common tasks
+  hosts: cluster
+  roles:
+    - common

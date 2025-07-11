@@ -1,0 +1,40 @@
+---
+- name: Check network connectivity
+  block:
+    - name: Attempt to ping xiong03.cn
+      command: ping -c 3 xiong03.cn
+      register: ping_result
+      failed_when: false 
+      changed_when: false
+    - name: Update group network status if any host fails
+      run_once: true  # 只在一台主机上执行
+      delegate_to: localhost
+      set_fact:
+        all_hosts_network_ok: false
+      when: "hostvars[item].ping_result.rc != 0"
+      loop: "{{ ansible_play_hosts }}"  # 遍历所有主机
+      loop_control:
+        label: "{{ item }}"
+    - name: quit if network is unreachable
+      run_once: true
+      delegate_to: localhost
+      fail: 
+        msg: "Network is unreachable for one or more hosts. Please check your network connection."
+      when: not all_hosts_network_ok
+
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: yes
+  
+- name: Install necessary packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - ntpdate
+
+- name: Synchronize time with NTP server
+  ansible.builtin.command: ntpdate ntp.aliyun.com
+
+- name: set timezone to Asia/Shanghai
+  ansible.builtin.command: timedatectl set-timezone Asia/Shanghai

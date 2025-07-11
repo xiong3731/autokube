@@ -1,0 +1,32 @@
+cluster:
+  children:
+    master_bootstrap:
+      hosts:
+        10.60.148.163:
+    master_add:
+      hosts:
+        10.60.35.166:
+        10.60.70.68:
+    node_add:
+      hosts:
+        10.60.46.42:
+        10.60.244.148:
+        10.60.193.55:
+
+# all:
+#   vars:
+#     filebeat_version: "7.17.28"
+#   children:
+#     host-uk8s-1a0krj8zx8t9:
+#       hosts:
+#         host-uk8s-1a0krj8zx8t9-1:
+#           ansible_host: 2003:da8:2004:1000:0a09:4955:1023:4973
+#         host-uk8s-1a0krj8zx8t9-2:
+#           ansible_host: 2003:da8:2004:1000:0a09:4818:1023:4973
+#         host-uk8s-1a0krj8zx8t9-3:
+#           ansible_host: 2003:da8:2004:1000:0a09:484a:1023:4973
+#       vars:
+#         ansible_ssh_private_key_file: /usr/local/lib/usec/id/spt-id-rsa
+#         cluster_name: "k8s-u-ci-standard-bbmax"
+#         kafka_hosts: ["10.9.64.57:9092", "10.9.65.170:9092", "10.9.65.207:9092"]
+
