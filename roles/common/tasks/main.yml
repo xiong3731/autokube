@@ -38,3 +38,4 @@
 
 - name: set timezone to Asia/Shanghai
   ansible.builtin.command: timedatectl set-timezone Asia/Shanghai
+  
