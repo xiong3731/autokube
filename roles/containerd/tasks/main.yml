@@ -1,0 +1,4 @@
+---
+- name: echo error
+  fail:
+    msg: "containerd还没有写,先用docker"

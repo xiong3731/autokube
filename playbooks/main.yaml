@@ -1,5 +1,18 @@
----
-- name: common tasks
+# ---
+# - name: common tasks
+#   hosts: cluster
+#   roles:
+#     - common
+
+- name: install runtime
   hosts: cluster
-  roles:
-    - common
+  tasks: 
+    - name: install docker
+      include_role:
+        name: docker
+      when:  ( enable_docker | bool ) or (enable_docker is not defined)
+
+    - name: install containerd
+      include_role:
+        name: containerd
+      when: not enable_docker | bool
