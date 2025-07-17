@@ -2,7 +2,11 @@ enable_proxy: true
 enable_docker: true
 enable_kubeadm: false
 all_hosts_network_ok: true
-
-k8s_version: "1.28.15"
+remote_download: false
+etcd_version: "v3.6.2"
+k8s_version: "v1.28.15"
 ansible_ssh_private_key_file: ~/.ssh/id_rsa
 ansible_python_interpreter: /usr/bin/python3
+# https://xiong03.oss-cn-hangzhou.aliyuncs.com/kubernetes/v1.28.5/kubernetes-client-linux-amd64.tar.gz
+# download_url: "https://xiong03.oss-cn-hangzhou.aliyuncs.com"
+download_url: "http://10.60.100.1:40080"

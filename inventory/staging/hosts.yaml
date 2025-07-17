@@ -1,18 +1,21 @@
 cluster:
   children:
-    master_bootstrap:
-      hosts:
-        10.60.148.163:
-    master_add:
-      hosts:
-        10.60.35.166:
-        10.60.70.68:
+    master:
+      children:
+        master_bootstrap:
+          hosts:
+            10.60.148.163:
+        master_add:
+          hosts:
+            10.60.35.166:
+            10.60.70.68:
     node_add:
       hosts:
         10.60.46.42:
         10.60.244.148:
         10.60.193.55:
-
+localhost:
+  ansible_connection: local
 # all:
 #   vars:
 #     filebeat_version: "7.17.28"
