@@ -11,3 +11,4 @@ ansible_python_interpreter: /usr/bin/python3
 # https://xiong03.oss-cn-hangzhou.aliyuncs.com/kubernetes/v1.28.5/kubernetes-client-linux-amd64.tar.gz
 # download_url: "https://xiong03.oss-cn-hangzhou.aliyuncs.com"
 download_url: "http://10.60.100.1:40080"
+artifacts_dir: "../artifacts"

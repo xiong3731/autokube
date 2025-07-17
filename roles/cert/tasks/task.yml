@@ -53,9 +53,8 @@
 - name: print create_out
   debug: 
     msg: "{{create_out}}"
-
 - name: 拉取生成的文件
   synchronize:
     src: /opt/etc
-    dest: ../zhenshu/
+    dest: "{{ artifacts_dir }}/certs/"
     mode: pull

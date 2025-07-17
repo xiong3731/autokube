@@ -1,7 +1,7 @@
 - name: 检查 zhenshu 目录是否存在
   delegate_to: localhost
   stat:
-    path: ../zhenshu/
+    path: "{{ artifacts_dir }}/certs/"
   register: kubernetes_dir
 
 - name: 运行任务 task.yml
