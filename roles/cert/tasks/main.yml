@@ -1,0 +1,9 @@
+- name: 检查 zhenshu 目录是否存在
+  delegate_to: localhost
+  stat:
+    path: ../zhenshu/
+  register: kubernetes_dir
+
+- name: 运行任务 task.yml
+  include_tasks: task.yml
+  when: inventory_hostname in groups['master_bootstrap'] and not kubernetes_dir.stat.exists

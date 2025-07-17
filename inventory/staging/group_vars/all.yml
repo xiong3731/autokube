@@ -1,3 +1,4 @@
+apiserver_lb: nginx
 enable_proxy: true
 enable_docker: true
 enable_kubeadm: false

@@ -1,25 +1,31 @@
-# ---
-# - name: common tasks
-#   hosts: cluster
-#   roles:
-#     - common
+---
+- name: common tasks
+  hosts: cluster
+  roles:
+    - common
 
-# - name: install runtime
-#   hosts: cluster
-#   tasks: 
-#     - name: install docker
-#       include_role:
-#         name: docker
-#       when:  ( enable_docker | bool ) or (enable_docker is not defined)
-
-#     - name: install containerd
-#       include_role:
-#         name: containerd
-#       when: not enable_docker | bool
-
-- name: install kube-components
+- name: install runtime
   hosts: cluster
   tasks: 
-    - name: components
+    - name: install docker
       include_role:
-        name: kube_components
+        name: docker
+      when:  ( enable_docker | bool ) or (enable_docker is not defined)
+
+    - name: install containerd
+      include_role:
+        name: containerd
+      when: not enable_docker | bool
+
+- name: kube_components
+  hosts: cluster
+  tasks:
+    - name: download and install kube components
+      include_role:
+        name: kube_components  
+        tasks_from: download_and_install.yaml  
+
+- name: init certificates
+  hosts: master_bootstrap
+  roles:
+    - cert

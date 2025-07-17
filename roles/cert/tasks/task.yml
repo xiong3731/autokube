@@ -1,0 +1,61 @@
+---
+- name: install rsync
+  apt:
+    name: rsync
+    state: latest
+- name: remove old cert files
+  file:
+    path: /opt/etc/
+    state: absent
+
+- name: get cfssl tools
+  block: 
+  - ansible.builtin.uri:
+      url: "{{ download_url }}/cfssl/{{ item }}"
+      dest: /tmp/
+    loop:
+      - cfssl-certinfo_1.6.5_linux_amd64
+      - cfssl_1.6.5_linux_amd64
+      - cfssljson_1.6.5_linux_amd64
+  - ansible.builtin.copy:
+      src: "/tmp/{{ item.src }}"
+      dest: "/usr/local/bin/{{ item.dest }}"
+      remote_src: yes
+      mode: '0755'
+    loop:
+      - { src: "cfssl-certinfo_1.6.5_linux_amd64", dest: "cfssl-certinfo" }
+      - { src: "cfssl_1.6.5_linux_amd64", dest: "cfssl" }
+      - { src: "cfssljson_1.6.5_linux_amd64", dest: "cfssljson" }
+
+- name: create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop: 
+    - /opt/etc/etcd/ssl
+    - /opt/etc/kubernetes/pki
+    - /tmp/json
+- name: Sync files from local files folder to remote
+  synchronize:
+    src: files/alljson/
+    dest: /tmp/json/
+    mode: push
+
+- name: 创建脚本文件
+  template: 
+    src: create.j2
+    dest: /tmp/create.sh
+
+- name: 运行脚本文件
+  shell: bash -x /tmp/create.sh
+  register: create_out
+
+- name: print create_out
+  debug: 
+    msg: "{{create_out}}"
+
+- name: 拉取生成的文件
+  synchronize:
+    src: /opt/etc
+    dest: ../zhenshu/
+    mode: pull

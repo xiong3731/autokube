@@ -1,14 +1,4 @@
----
-- name: test
+- name: init certificates
   hosts: cluster
-  gather_facts: false
-  tasks:
-    - name: Print inventory hosts
-      debug:
-        msg: "Host: {{ inventory_hostname }}, IP: {{ ansible_host | default('N/A') }}"
-      when: inventory_hostname in groups['master_bootstrap'] or inventory_hostname in groups['master_add'] or inventory_hostname in groups['node_add']
-      
-    - name: Print SSH private key file
-      debug:
-        msg: "SSH Private Key File: {{ ansible_ssh_private_key_file }}"
-      when: ansible_ssh_private_key_file is defined
+  roles:
+    - cert

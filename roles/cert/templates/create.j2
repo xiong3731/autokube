@@ -1,0 +1,154 @@
+cfssl gencert -initca /tmp/json/etcd-ca-csr.json | cfssljson -bare /opt/etc/etcd/ssl/etcd-ca
+cfssl gencert \
+   -ca=/opt/etc/etcd/ssl/etcd-ca.pem \
+   -ca-key=/opt/etc/etcd/ssl/etcd-ca-key.pem \
+   -config=/tmp/json/ca-config.json \
+   -hostname=127.0.0.1,{% for i in groups['cluster'] %}{{ hostvars[i].ansible_facts.hostname }},{{ hostvars[i].ansible_facts.default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %} \
+   -profile=kubernetes \
+   /tmp/json/etcd-csr.json | cfssljson -bare /opt/etc/etcd/ssl/etcd
+
+cfssl gencert -initca /tmp/json/ca-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/ca
+cfssl gencert   \
+   -ca=/opt/etc/kubernetes/pki/ca.pem   \
+   -ca-key=/opt/etc/kubernetes/pki/ca-key.pem   \
+   -config=/tmp/json/ca-config.json   \
+   -hostname=10.96.0.1,127.0.0.1,kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.default.svc.cluster.local,{% for i in groups['cluster'] %}{{ hostvars[i].ansible_facts.hostname }},{{ hostvars[i].ansible_facts.default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %}  \
+   -profile=kubernetes   /tmp/json/apiserver-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/apiserver
+
+cfssl gencert   -initca /tmp/json/front-proxy-ca-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/front-proxy-ca 
+cfssl gencert  \
+-ca=/opt/etc/kubernetes/pki/front-proxy-ca.pem   \
+-ca-key=/opt/etc/kubernetes/pki/front-proxy-ca-key.pem   \
+-config=/tmp/json/ca-config.json   \
+-profile=kubernetes   /tmp/json/front-proxy-client-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/front-proxy-client
+
+cfssl gencert \
+   -ca=/opt/etc/kubernetes/pki/ca.pem \
+   -ca-key=/opt/etc/kubernetes/pki/ca-key.pem \
+   -config=/tmp/json/ca-config.json \
+   -profile=kubernetes \
+   /tmp/json/manager-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/controller-manager
+
+kubectl config set-cluster kubernetes \
+     --certificate-authority=/opt/etc/kubernetes/pki/ca.pem \
+     --embed-certs=true \
+     --server=https://127.0.0.1:16443 \
+     --kubeconfig=/opt/etc/kubernetes/controller-manager.kubeconfig
+
+kubectl config set-context system:kube-controller-manager@kubernetes \
+    --cluster=kubernetes \
+    --user=system:kube-controller-manager \
+    --kubeconfig=/opt/etc/kubernetes/controller-manager.kubeconfig
+
+kubectl config set-credentials system:kube-controller-manager \
+     --client-certificate=/opt/etc/kubernetes/pki/controller-manager.pem \
+     --client-key=/opt/etc/kubernetes/pki/controller-manager-key.pem \
+     --embed-certs=true \
+     --kubeconfig=/opt/etc/kubernetes/controller-manager.kubeconfig
+
+kubectl config use-context system:kube-controller-manager@kubernetes \
+     --kubeconfig=/opt/etc/kubernetes/controller-manager.kubeconfig
+
+cfssl gencert \
+   -ca=/opt/etc/kubernetes/pki/ca.pem \
+   -ca-key=/opt/etc/kubernetes/pki/ca-key.pem \
+   -config=/tmp/json/ca-config.json \
+   -profile=kubernetes \
+   /tmp/json/scheduler-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/scheduler
+
+kubectl config set-cluster kubernetes \
+     --certificate-authority=/opt/etc/kubernetes/pki/ca.pem \
+     --embed-certs=true \
+     --server=https://127.0.0.1:16443 \
+     --kubeconfig=/opt/etc/kubernetes/scheduler.kubeconfig
+
+kubectl config set-credentials system:kube-scheduler \
+     --client-certificate=/opt/etc/kubernetes/pki/scheduler.pem \
+     --client-key=/opt/etc/kubernetes/pki/scheduler-key.pem \
+     --embed-certs=true \
+     --kubeconfig=/opt/etc/kubernetes/scheduler.kubeconfig
+
+kubectl config set-context system:kube-scheduler@kubernetes \
+     --cluster=kubernetes \
+     --user=system:kube-scheduler \
+     --kubeconfig=/opt/etc/kubernetes/scheduler.kubeconfig
+
+kubectl config use-context system:kube-scheduler@kubernetes \
+     --kubeconfig=/opt/etc/kubernetes/scheduler.kubeconfig
+
+cfssl gencert \
+   -ca=/opt/etc/kubernetes/pki/ca.pem \
+   -ca-key=/opt/etc/kubernetes/pki/ca-key.pem \
+   -config=/tmp/json/ca-config.json \
+   -profile=kubernetes \
+   /tmp/json/admin-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/admin
+
+kubectl config set-cluster kubernetes     \
+  --certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
+  --embed-certs=true     \
+  --server=https://127.0.0.1:16443     \
+  --kubeconfig=/opt/etc/kubernetes/admin.kubeconfig
+
+kubectl config set-credentials kubernetes-admin  \
+  --client-certificate=/opt/etc/kubernetes/pki/admin.pem     \
+  --client-key=/opt/etc/kubernetes/pki/admin-key.pem     \
+  --embed-certs=true     \
+  --kubeconfig=/opt/etc/kubernetes/admin.kubeconfig
+
+
+kubectl config set-context kubernetes-admin@kubernetes    \
+  --cluster=kubernetes     \
+  --user=kubernetes-admin     \
+  --kubeconfig=/opt/etc/kubernetes/admin.kubeconfig
+
+
+kubectl config use-context kubernetes-admin@kubernetes  --kubeconfig=/opt/etc/kubernetes/admin.kubeconfig
+
+cfssl gencert \
+   -ca=/opt/etc/kubernetes/pki/ca.pem \
+   -ca-key=/opt/etc/kubernetes/pki/ca-key.pem \
+   -config=/tmp/json/ca-config.json \
+   -profile=kubernetes \
+   /tmp/json/kube-proxy-csr.json | cfssljson -bare /opt/etc/kubernetes/pki/kube-proxy
+
+kubectl config set-cluster kubernetes     \
+  --certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
+  --embed-certs=true     \
+  --server=https://127.0.0.1:16443     \
+  --kubeconfig=/opt/etc/kubernetes/kube-proxy.kubeconfig
+
+kubectl config set-credentials kube-proxy  \
+  --client-certificate=/opt/etc/kubernetes/pki/kube-proxy.pem     \
+  --client-key=/opt/etc/kubernetes/pki/kube-proxy-key.pem     \
+  --embed-certs=true     \
+  --kubeconfig=/opt/etc/kubernetes/kube-proxy.kubeconfig
+
+kubectl config set-context kube-proxy@kubernetes    \
+  --cluster=kubernetes     \
+  --user=kube-proxy     \
+  --kubeconfig=/opt/etc/kubernetes/kube-proxy.kubeconfig
+
+kubectl config use-context kube-proxy@kubernetes  --kubeconfig=/opt/etc/kubernetes/kube-proxy.kubeconfig
+
+openssl genrsa -out /opt/etc/kubernetes/pki/sa.key 2048
+
+openssl rsa -in /opt/etc/kubernetes/pki/sa.key -pubout -out /opt/etc/kubernetes/pki/sa.pub
+
+kubectl config set-cluster kubernetes     \
+--certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
+--embed-certs=true     --server=https://127.0.0.1:16443     \
+--kubeconfig=/opt/etc/kubernetes/bootstrap-kubelet.kubeconfig
+
+kubectl config set-credentials tls-bootstrap-token-user     \
+--token=c8ad9c.2e4d610cf3e7426e \
+--kubeconfig=/opt/etc/kubernetes/bootstrap-kubelet.kubeconfig
+
+kubectl config set-context tls-bootstrap-token-user@kubernetes     \
+--cluster=kubernetes     \
+--user=tls-bootstrap-token-user     \
+--kubeconfig=/opt/etc/kubernetes/bootstrap-kubelet.kubeconfig
+
+kubectl config use-context tls-bootstrap-token-user@kubernetes     \
+--kubeconfig=/opt/etc/kubernetes/bootstrap-kubelet.kubeconfig
+
+ls /opt/etc/kubernetes/pki | wc -l
