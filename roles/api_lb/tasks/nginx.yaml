@@ -1,0 +1,56 @@
+---
+- name: install nginx in master
+  block:
+    - name: install necessary packages
+      ansible.builtin.package:
+        name:
+          - gcc
+          - make
+          - g++ 
+          - automake 
+          - autoconf
+          - openssl
+          - zlib1g-dev 
+          - libpcre3-dev 
+          - libssl-dev
+        state: present
+    - name: create nginx directory
+      ansible.builtin.file:
+        path: /opt/nginx
+        state: directory
+    - name: install nginx
+      ansible.builtin.uri:
+        url: "{{ download_url }}/nginx/nginx-{{nginx_version}}.tar.gz"
+        dest: /tmp/nginx.tar.gz
+    - name: extract nginx
+      ansible.builtin.unarchive:
+        src: /tmp/nginx.tar.gz
+        extra_opts:
+          - --strip-components=1
+        dest: /opt/nginx/
+        remote_src: yes
+    - name: make nginx
+      ansible.builtin.shell:
+        cmd: |
+          ./configure --with-stream --without-http --without-http_uwsgi_module --without-http_scgi_module --without-http_fastcgi_module --prefix=/usr/local/nginx/ 
+          make 
+          make install
+        chdir: /opt/nginx
+        creates: /usr/local/nginx/sbin/nginx
+    - name: check if nginx is installed
+      ansible.builtin.command:
+        cmd: /usr/local/nginx/sbin/nginx -v
+
+- name: configure nginx
+  template:
+    src: kube-nginx.conf.j2
+    dest: /usr/local/nginx/conf/kube-nginx.conf
+- name: config nginx systemd service
+  template:
+    src: kube-nginx.service.j2
+    dest: /etc/systemd/system/kube-nginx.service
+- name: enable and start nginx service
+  ansible.builtin.systemd:
+    name: kube-nginx
+    enabled: true
+    state: restarted

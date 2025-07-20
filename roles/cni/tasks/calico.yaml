@@ -1,0 +1,33 @@
+---
+
+- name: install calico cni
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: /tmp/{{ item }}
+  loop:
+    - custom-resources.yaml
+    - tigera-operator.yaml
+- name: apply calico cni custom resources
+  ansible.builtin.shell:
+    cmd: |
+      kubectl create -f /tmp/tigera-operator.yaml
+  ignore_errors: true
+- name: wait for calico cni to be ready
+  ansible.builtin.shell:
+    cmd: |
+      kubectl wait --for=condition=Ready pods --all -n tigera-operator --timeout=300s
+  register: calico_wait_result
+  until: calico_wait_result is succeeded
+  retries: 5
+  delay: 60
+- name: apply calico cni custom resources
+  ansible.builtin.shell:  
+    cmd: kubectl create -f /tmp/custom-resources.yaml
+- name: wait for calico cni to be ready
+  ansible.builtin.shell:
+    cmd: |
+      kubectl wait --for=condition=Ready pods --all -n calico-system --timeout=300s
+  register: calico_wait_result
+  until: calico_wait_result is succeeded
+  retries: 5
+  delay: 60

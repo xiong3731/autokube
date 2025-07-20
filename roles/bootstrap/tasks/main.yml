@@ -1,0 +1,26 @@
+---
+- name: kubectl config
+  ansible.builtin.shell:
+    cmd: |
+      rm -f /etc/kubernetes/kubelet.kubeconfig
+      mkdir -p /root/.kube ; cp /etc/kubernetes/admin.kubeconfig /root/.kube/config
+- name: bootstrap secret
+  ansible.builtin.template:
+    src: bootstrap.secret.yaml.j2
+    dest: /etc/kubernetes/bootstrap.secret.yaml
+- name: check if all kube components are healthy
+  ansible.builtin.shell: kubectl get componentstatuses | grep -c Healthy
+  register: kube_components
+  until: kube_components.stdout | int == 3 
+  retries: 5
+  delay: 10
+  changed_when: false  
+- name: kubectl delete -f /etc/kubernetes/bootstrap.secret.yaml
+  ansible.builtin.shell: kubectl delete -f /etc/kubernetes/bootstrap.secret.yaml
+  register: bootstrap_secret_delete
+  changed_when: bootstrap_secret_delete.rc == 0
+  ignore_errors: true
+- name: kubectl create -f /etc/kubernetes/bootstrap.secret.yaml
+  ansible.builtin.shell: kubectl create -f /etc/kubernetes/bootstrap.secret.yaml
+  register: bootstrap_secret
+  changed_when: bootstrap_secret.rc == 0

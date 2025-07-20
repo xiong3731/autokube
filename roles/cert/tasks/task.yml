@@ -53,6 +53,11 @@
 - name: print create_out
   debug: 
     msg: "{{create_out}}"
+- name: mkdir {{ artifacts_dir }}/certs
+  file: 
+    dest: "{{ artifacts_dir }}/certs"
+    state: directory
+  delegate_to: localhost
 - name: 拉取生成的文件
   synchronize:
     src: /opt/etc

@@ -1,4 +1,8 @@
-- name: init certificates
-  hosts: cluster
-  roles:
-    - cert
+---
+- name: cni
+  hosts: master_bootstrap
+  tasks:
+    - name: install cni
+      include_role:
+        name: cni
+        tasks_from: calico.yaml

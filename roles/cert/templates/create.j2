@@ -3,7 +3,7 @@ cfssl gencert \
    -ca=/opt/etc/etcd/ssl/etcd-ca.pem \
    -ca-key=/opt/etc/etcd/ssl/etcd-ca-key.pem \
    -config=/tmp/json/ca-config.json \
-   -hostname=127.0.0.1,{% for i in groups['cluster'] %}{{ hostvars[i].ansible_facts.hostname }},{{ hostvars[i].ansible_facts.default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %} \
+   -hostname=127.0.0.1,{% for i in groups['master'] %}{{ hostvars[i].ansible_facts.hostname }},{{ hostvars[i].ansible_facts.default_ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %} \
    -profile=kubernetes \
    /tmp/json/etcd-csr.json | cfssljson -bare /opt/etc/etcd/ssl/etcd
 
@@ -32,7 +32,7 @@ cfssl gencert \
 kubectl config set-cluster kubernetes \
      --certificate-authority=/opt/etc/kubernetes/pki/ca.pem \
      --embed-certs=true \
-     --server=https://127.0.0.1:16443 \
+     --server=https://{{ ansible_default_ipv4.address }}:16443 \
      --kubeconfig=/opt/etc/kubernetes/controller-manager.kubeconfig
 
 kubectl config set-context system:kube-controller-manager@kubernetes \
@@ -59,7 +59,7 @@ cfssl gencert \
 kubectl config set-cluster kubernetes \
      --certificate-authority=/opt/etc/kubernetes/pki/ca.pem \
      --embed-certs=true \
-     --server=https://127.0.0.1:16443 \
+     --server=https://{{ ansible_default_ipv4.address }}:16443 \
      --kubeconfig=/opt/etc/kubernetes/scheduler.kubeconfig
 
 kubectl config set-credentials system:kube-scheduler \
@@ -86,7 +86,7 @@ cfssl gencert \
 kubectl config set-cluster kubernetes     \
   --certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
   --embed-certs=true     \
-  --server=https://127.0.0.1:16443     \
+  --server=https://{{ ansible_default_ipv4.address }}:16443     \
   --kubeconfig=/opt/etc/kubernetes/admin.kubeconfig
 
 kubectl config set-credentials kubernetes-admin  \
@@ -114,7 +114,7 @@ cfssl gencert \
 kubectl config set-cluster kubernetes     \
   --certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
   --embed-certs=true     \
-  --server=https://127.0.0.1:16443     \
+  --server=https://{{ ansible_default_ipv4.address }}:16443     \
   --kubeconfig=/opt/etc/kubernetes/kube-proxy.kubeconfig
 
 kubectl config set-credentials kube-proxy  \
@@ -136,7 +136,7 @@ openssl rsa -in /opt/etc/kubernetes/pki/sa.key -pubout -out /opt/etc/kubernetes/
 
 kubectl config set-cluster kubernetes     \
 --certificate-authority=/opt/etc/kubernetes/pki/ca.pem     \
---embed-certs=true     --server=https://127.0.0.1:16443     \
+--embed-certs=true     --server=https://{{ ansible_default_ipv4.address }}:16443     \
 --kubeconfig=/opt/etc/kubernetes/bootstrap-kubelet.kubeconfig
 
 kubectl config set-credentials tls-bootstrap-token-user     \

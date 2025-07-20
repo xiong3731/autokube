@@ -1,0 +1,15 @@
+---
+- name: kubelet systemd service
+  ansible.builtin.template:
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+- name: kubelet.yaml
+  ansible.builtin.template:
+    src: kubelet-conf.yaml.j2
+    dest: /etc/kubernetes/kubelet-conf.yaml
+- name: start kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: restarted
+    enabled: true
+    daemon_reload: true

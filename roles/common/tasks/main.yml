@@ -37,7 +37,8 @@
       - ca-certificates 
       - curl 
       - gnupg
-
+      - ipset 
+      - ipvsadm
 - name: Synchronize time with NTP server
   ansible.builtin.command: ntpdate ntp.aliyun.com
 
@@ -104,3 +105,13 @@
 - name: sysctl --system
   ansible.builtin.command: sysctl --system
 
+- name: create directory 
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop: 
+    - /etc/kubernetes/manifests/
+    - /etc/systemd/system/kubelet.service.d
+    - /var/lib/kubelet
+    - /var/log/kubernetes

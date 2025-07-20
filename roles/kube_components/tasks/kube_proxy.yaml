@@ -1,0 +1,15 @@
+---
+- name: kube_proxy systemd service
+  ansible.builtin.template:
+    src: kube_proxy.service.j2
+    dest: /etc/systemd/system/kube-proxy.service
+- name: kube-proxy.yaml
+  ansible.builtin.template:
+    src: kube-proxy.yaml.j2
+    dest: /etc/kubernetes/kube-proxy.yaml
+- name: start kube_proxy
+  ansible.builtin.systemd:
+    name: kube-proxy
+    daemon_reload: true
+    state: restarted
+    enabled: true

@@ -1,1 +1,27 @@
----
+- name: create and validate etcd config
+  block:
+    - name: create the etcd config
+      template:
+        src: etcd.config.j2
+        dest: /etc/etcd/etcd.config
+  rescue:
+    - name: handle etcd config failure
+      fail:
+        msg: |
+          注意, 请检查ansible控制节点的artifacts文件夹有没有清空!
+- name: etcd.service
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+
+- name: stop etcd service
+  systemd: 
+    daemon_reload: true
+    name: etcd  
+    state: stopped
+- name: start etcd service
+  systemd: 
+    daemon_reload: true
+    name: etcd  
+    enabled: true
+    state: started

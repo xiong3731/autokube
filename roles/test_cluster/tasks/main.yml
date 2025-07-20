@@ -1,0 +1,12 @@
+---
+- name: test
+  ansible.builtin.shell:
+    cmd: |
+      kubectl get po -a
+      kubectl get nodes
+  register: test_result
+  ignore_errors: true
+- name: Display test results
+  ansible.builtin.debug:
+    msg: "{{ test_result.stdout }}"
+  when: test_result is defined and test_result.stdout is defined

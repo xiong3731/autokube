@@ -1,0 +1,4 @@
+[Service]
+Environment="HTTP_PROXY=http://{{ use_proxy }}/"
+Environment="HTTPS_PROXY=http://{{ use_proxy }}/"
+Environment="NO_PROXY={{ no_proxy }}"

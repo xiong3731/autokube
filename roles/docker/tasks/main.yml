@@ -31,8 +31,51 @@
     - containerd.io
     - docker-buildx-plugin
     - docker-compose-plugin
+
+# sudo mkdir -p /etc/systemd/system/docker.service.d
+# sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
+- name: use proxy?
+  block: 
+    - name: Create Docker systemd directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+    - name: Create Docker proxy configuration
+      ansible.builtin.template:
+        src: http-proxy.conf.j2
+        dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+  when: use_proxy is defined and use_proxy != ""
 - name: Ensure Docker service is running
   ansible.builtin.systemd:
     name: docker
-    state: started
+    state: restarted
     enabled: true
+    daemon_reload: true
+
+- name: cri-docker
+  ansible.builtin.uri:
+    url: "{{ download_url }}/cri-docker/cri-dockerd-{{cri_docker_version}}.amd64.tgz"
+    dest: /tmp/cri-dockerd.tgz
+    mode: '0644'
+- name: unarchive cri-docker
+  ansible.builtin.unarchive:
+    src: /tmp/cri-dockerd.tgz
+    dest: /usr/local/bin/
+    remote_src: yes
+    mode: '0755'
+    extra_opts:
+      - --strip-components=1
+- name: cri-docker systemd service
+  ansible.builtin.template:
+    src: cri-docker.service.j2
+    dest: /etc/systemd/system/cri-docker.service
+- name: cri-docker socket
+  ansible.builtin.template:
+    src: cri-docker.socket.j2
+    dest: /etc/systemd/system/cri-docker.socket
+- name: start cri-docker
+  ansible.builtin.systemd:
+    name: cri-docker
+    state: restarted
+    enabled: true
+    daemon_reload: true

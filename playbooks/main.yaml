@@ -26,6 +26,75 @@
         tasks_from: download_and_install.yaml  
 
 - name: init certificates
-  hosts: master_bootstrap
+  hosts: cluster
   roles:
     - cert
+
+- name: etcd
+  hosts: master
+  tasks:
+    - name: etcd
+      include_role:
+        name: kube_components  
+        tasks_from: etcd.yaml
+- name: api_lb
+  hosts: master
+  tasks:
+    - name: nginx
+      include_role:
+        name: api_lb
+        tasks_from: nginx.yaml
+
+- name: kube-apiserver
+  hosts: master
+  tasks:
+    - name: kube-apiserver
+      include_role:
+        name: kube_components  
+        tasks_from: kube_apiserver.yaml
+- name: kube-controller-manager
+  hosts: master
+  tasks:
+    - name: kube-controller-manager
+      include_role:
+        name: kube_components  
+        tasks_from: kube_controller_manager.yaml
+- name: kube-scheduler
+  hosts: master
+  tasks: 
+    - name: kube-scheduler
+      include_role:
+        name: kube_components  
+        tasks_from: kube_scheduler.yaml
+- name: TLS Bootstrapping
+  hosts: master_bootstrap
+  roles:
+    - bootstrap
+- name: kube-proxy
+  hosts: cluster
+  tasks:  
+    - name: kube-proxy
+      include_role:
+        name: kube_components  
+        tasks_from: kube_proxy.yaml
+- name: kubelet
+  hosts: cluster
+  tasks:
+    - name: kubelet
+      include_role:
+        name: kube_components  
+        tasks_from: kubelet.yaml
+
+- name: cni
+  hosts: master_bootstrap
+  tasks:
+    - name: install cni
+      include_role:
+        name: cni
+        tasks_from: calico.yaml
+      when: cni == "calico"
+
+- name: test cluster
+  hosts: master_bootstrap
+  roles: 
+    - test_cluster

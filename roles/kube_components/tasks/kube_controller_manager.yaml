@@ -1,0 +1,11 @@
+---
+- name: kube_controller_manager systemd service
+  ansible.builtin.template:
+    src: kube_controller_manager.service.j2
+    dest: /etc/systemd/system/kube-controller-manager.service
+- name: start kube_controller_manager
+  ansible.builtin.systemd:
+    name: kube-controller-manager
+    state: restarted
+    daemon_reload: true
+    enabled: true
