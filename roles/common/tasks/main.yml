@@ -41,6 +41,8 @@
       - ipvsadm
 - name: Synchronize time with NTP server
   ansible.builtin.command: ntpdate ntp.aliyun.com
+  failed_when: false
+  changed_when: false
 
 - name: set timezone to Asia/Shanghai
   ansible.builtin.command: timedatectl set-timezone Asia/Shanghai
