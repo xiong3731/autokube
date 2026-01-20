@@ -4,15 +4,15 @@ cluster:
       children:
         master_bootstrap:
           hosts:
-            10.60.81.77:
+            10.7.62.130:
         master_add:
           hosts:
-            10.60.210.214:
-            10.60.37.50:
+            10.7.123.134:
+            10.7.150.44:
     node_add:
       hosts:
-        10.60.184.148:
-        10.60.117.250:
-        10.60.170.78:
+        10.7.106.110:
+        10.7.186.239:
+        10.7.56.231:
 localhost:
   ansible_connection: local
