@@ -1,8 +1,8 @@
 ---
 - name: Check network connectivity
   block:
-    - name: Attempt to ping xiong03.cn
-      command: ping -c 3 xiong03.cn
+    - name: Attempt to ping baidu.com
+      command: ping -c 3 baidu.com
       register: ping_result
       failed_when: false 
       changed_when: false
