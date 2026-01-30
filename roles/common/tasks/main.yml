@@ -39,6 +39,8 @@
       - gnupg
       - ipset 
       - ipvsadm
+      - socat
+      
 - name: Synchronize time with NTP server
   ansible.builtin.command: ntpdate ntp.aliyun.com
   failed_when: false
